@@ -1,43 +1,34 @@
-from tkinter import *
+import tkinter as tk
 import requests
 import time
+import os
 import json
 import urllib
 import random
 import tkinter.messagebox as messagebox
 
-init_window = Tk()  # 实例化出一个父窗口
-# 设置窗口属性
+init_window = tk.Tk()
 init_window.title("lofter我的喜欢下载  by AlessiaH")
-init_window.geometry('700x400+10+10')
+init_window.geometry('400x400+10+10')
 
-
-# 建立输入框
-# 地址
-labe_iddr = Label(init_window, text="lofter个人网址(如我的网址是sublatin.lofter.com)")
+labe_iddr = tk.Label(init_window, text="lofter个人网址(如我的网址是sublatin.lofter.com)")
 labe_iddr.pack()
-text_iddr_default = StringVar()
-text_iddr = Entry(init_window, textvariable=text_iddr_default)
+text_iddr_default = tk.StringVar()
+text_iddr = tk.Entry(init_window, textvariable=text_iddr_default)
 text_iddr_default.set("sublatin")
 text_iddr.pack()
 
-# 账户
-labe_like = Label(init_window, text="你\"喜欢\"的文档数量")
+labe_like = tk.Label(init_window, text="你\"喜欢\"的文档数量")
 labe_like.pack()
-text_like_default = StringVar()
-text_like = Entry(init_window, textvariable=text_like_default)
+text_like_default = tk.StringVar()
+text_like = tk.Entry(init_window, textvariable=text_like_default)
 text_like_default.set("4780")
 text_like.pack()
 
 
-# 密码
-# labe_pwd = Label(init_window, text="密码")
-# labe_pwd.pack()
-# text_pwd_default = StringVar()
-# text_pwd = Entry(init_window, textvariable = text_pwd_default)
-# text_pwd_default.set("root")
-# text_pwd.pack()
 def get_like():
+    global vstate
+    vstate = v.get()
     urllog = 'https://yaolu.yuedu.163.com/statistics/log/app/upload.json'
     headers = {'SDK-Ver': '2.1.7',
                'x-upload-time': str(int(time.time())),
@@ -62,13 +53,21 @@ def get_like():
              'androidid': ''}
     blogname = text_iddr.get()
     likecount = text_like.get()
+
+
+
+
+
     l1 = []
     # try:
     for i in range(1):
         url = 'http://api.lofter.com/v1.1/batchdata.api?product=lofter-android-6.9.2'
+
         for offset in range(0, int(likecount), 500):
-            print(offset)
-            data = 'supportposttypes=1%2C2%2C3%2C4%2C5%2C6&blogdomain={}.lofter.com&offset={}&method=favorites&postdigestnew=1&returnData=1&limit=10'.format(
+            lb.insert(tk.END, '开始爬取',offset)
+            lb.pack()
+            init_window.update()
+            data = 'supportposttypes=1%2C2%2C3%2C4%2C5%2C6&blogdomain={}.lofter.com&offset={}&method=favorites&postdigestnew=1&returnData=1&limit=500'.format(
                 blogname, offset)
             a = s.post(url, headers=heads, data=data, timeout=45)
             items = json.loads(a.text)['response']['items']
@@ -80,7 +79,6 @@ def get_like():
                         row['id'], row['title'], row['type'],
                         row['pubTime'], row['content'], row['blogPageUrl'],
                         row['blogInfo']['blogNickName'], row['blogInfo']['homePageUrl'], row['tagList'])
-                    print(title)
                     try:
                         tag1 = tags[0]
                     except:
@@ -91,8 +89,7 @@ def get_like():
                             tag_out += ', '
                         tag_out += """<a href="http://www.lofter.com/tag/{}">{}</a>""".format(urllib.parse.quote(t), t)
 
-                    r = """
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+                    r = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
   <meta charset="utf-8"/>
@@ -140,33 +137,66 @@ def get_like():
   <p class="message">如果你喜欢这篇post <a href="{}">请访问原页面</a>让作者感受到你的爱!</p>
   <p class="message">本页面参考<a href="http://archiveofourown.org">archive of our own</a>导出</p>
 </div>
-
+<p id ="if you have any further questions, please contact hhq1801@hotmail.com"><p>
 </body>
-</html>""".format(title, post_url, post_url, tag_out, pubTime, title, author_url, author, title,
-                                      content,
-                                      post_url)
-                    with open(r'{}-{}-{}.html'.format(postid, title, author).replace('/', '').replace('\\', ''), 'w',
-                              encoding='utf-8') as f:
+</html>""".format(title, post_url, post_url, tag_out, pubTime, title, author_url, author, title, content, post_url)
+                    filename =format('{}-{}-{}.html'.format(postid, title, author))
+                    if vstate!=1:
+                        print(vstate)
+                        if vstate == 2:
+                            path = author
+                            filename = format(author)+'\\'+ filename
+                        if vstate == 3:
+                            path = tag1
+                            if tag1=='':
+                                tag1='无tag'
+                            filename = format(tag1)+ '\\' + filename
+                        if not os.path.exists(path):
+                            os.makedirs(path)
+                    print(filename)
+                    with open(filename, 'w', encoding='utf-8') as f:
                         f.write(r)
+                    lb.insert(tk.END, filename)
+                    lb.pack()
+                    init_window.update()
                 except:
                     None
             time.sleep(random.randint(2, 4))
 
+
         messagebox.showinfo(title='successed', message='已成功下载')
         print(1)
 
-        init_window.destroy()
-        init_window.mainloop()
-    # except:
-    #     print("ERROR")
-    #     messagebox.showinfo(title='failed', message='失败')
+        # init_window.destroy()
+        # init_window.mainloop()
 
 
+# 定义变量
+v = tk.IntVar()
+# 设置第二个未默认
+v.set(1)
+# 单选框
+r1 = tk.Radiobutton(init_window, text="默认保存至当前路径", value=1, variable=v)
+r1.pack()
+r2 = tk.Radiobutton(init_window, text="按作者保存至不同文件夹", value=2, variable=v)
+r2.pack()
+r3 = tk.Radiobutton(init_window, text="按首tag保存至不同文件夹", value=3, variable=v)
+r3.pack()
 
-# 建立按钮
-# 通过command属性来指定Button的回调函数
-button_sure = Button(init_window, text="确定", width=15,
-                     height=2, command=get_like)
+# 获取状态
+
+button_sure = tk.Button(init_window, text="确定", width=15,
+                        height=2, command=get_like)
 button_sure.pack()
+
+lb = tk.Listbox(init_window)
+yscrollbar = tk.Scrollbar(lb, command=lb.yview)
+yscrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+lb.config(yscrollcommand=yscrollbar.set)
+lb.pack(fill=tk.BOTH,expand=True)
+def format(t):
+    return t.replace('/', '').replace('\\', '').replace(
+                            '|', '').replace('<', '').replace('>', '').replace('?', '').replace('*', '').replace(':',
+                             '').replace('\"', '')
 init_window.mainloop()
-# 6.按钮回调函数，拷贝输入框的字符串，然后将字符串用于连接数据库
+
