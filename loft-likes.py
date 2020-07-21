@@ -18,13 +18,19 @@ text_iddr = tk.Entry(init_window, textvariable=text_iddr_default)
 text_iddr_default.set("sublatin")
 text_iddr.pack()
 
-labe_like = tk.Label(init_window, text="你\"喜欢\"的文档数量")
-labe_like.pack()
-text_like_default = tk.StringVar()
-text_like = tk.Entry(init_window, textvariable=text_like_default)
-text_like_default.set("4780")
-text_like.pack()
+labe_like1 = tk.Label(init_window, text="你\"喜欢\"的文档数量：\n 从\n(默认填0即从最新喜欢的开始下载，如果分批下载可以填上一次下载数)")
+labe_like1.pack()
+text_like1_default = tk.StringVar()
+text_like1 = tk.Entry(init_window, textvariable=text_like1_default)
+text_like1_default.set("0")
+text_like1.pack()
 
+labe_like2 = tk.Label(init_window, text="到")
+labe_like2.pack()
+text_like2_default = tk.StringVar()
+text_like2 = tk.Entry(init_window, textvariable=text_like2_default)
+text_like2_default.set("4780")
+text_like2.pack()
 
 def get_like():
     global vstate
@@ -52,23 +58,31 @@ def get_like():
              'dadeviceid': '',
              'androidid': ''}
     blogname = text_iddr.get()
-    likecount = text_like.get()
+    likecount1 = text_like1.get()
+    likecount2 = text_like1.get()
+    likecount1 = likecount1.split('(')[0]
 
-
-
-
+    try:
+        int(likecount1)
+        int(likecount2)
+    except:
+        messagebox.showinfo(title='failed', message='请输入整数')
 
     l1 = []
     # try:
     for i in range(1):
         url = 'http://api.lofter.com/v1.1/batchdata.api?product=lofter-android-6.9.2'
-
-        for offset in range(0, int(likecount), 500):
+        step = int(likecount2)-int(likecount1)+1
+        if step >= 1000:
+            step = 1000
+        elif step >= 500:
+            step = 500
+        for offset in range(int(likecount1), int(likecount2), step):
             lb.insert(tk.END, '开始爬取',offset)
             lb.pack()
             init_window.update()
-            data = 'supportposttypes=1%2C2%2C3%2C4%2C5%2C6&blogdomain={}.lofter.com&offset={}&method=favorites&postdigestnew=1&returnData=1&limit=500'.format(
-                blogname, offset)
+            data = 'supportposttypes=1%2C2%2C3%2C4%2C5%2C6&blogdomain={}.lofter.com&offset={}&method=favorites&postdigestnew=1&returnData=1&limit={}'.format(
+                blogname, offset, step)
             a = s.post(url, headers=heads, data=data, timeout=45)
             items = json.loads(a.text)['response']['items']
             for i in range(len(items)):
@@ -164,7 +178,7 @@ def get_like():
             time.sleep(random.randint(2, 4))
 
 
-        messagebox.showinfo(title='successed', message='已成功下载')
+        messagebox.showinfo(title='successed', message='已成功下载\n 请查看该程序所在文件夹')
         print(1)
 
         # init_window.destroy()
