@@ -31,4 +31,6 @@ pyinstaller打包为exe
 ## 注意
 需要设定自己的喜欢为公开状态
 
-有什么问题lofter联系
+有什么问题lofter联系，或者提issue
+
+有帮助到你就star一下吧~
