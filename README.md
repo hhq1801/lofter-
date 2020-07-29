@@ -30,7 +30,7 @@ requests爬取
 
 tkinter画GUI
 
-pyinstaller打包为exe
+pyinstaller打包为exe(打包时用pipenv创建虚拟环境，否则exe文件过大)
 
 ## 注意
 需要设定自己的喜欢为公开状态
