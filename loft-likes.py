@@ -59,7 +59,7 @@ def get_like():
              'androidid': ''}
     blogname = text_iddr.get()
     likecount1 = text_like1.get()
-    likecount2 = text_like1.get()
+    likecount2 = text_like2.get()
     likecount1 = likecount1.split('(')[0]
 
     try:
@@ -88,6 +88,11 @@ def get_like():
             for i in range(len(items)):
                 try:
                     row = items[i]['post']  # ['postCollection']# ['content']#['blogInfo']
+                    img = ''
+                    if row['type']==2:
+                        photoLinks = json.loads(row['photoLinks'])
+                        for link in photoLinks:
+                            img += """<p><img src="{}"  alt="无法访问" /></p> \n""".format(link['raw'])
                     row['pubTime'] = time.strftime("%Y-%m-%d", time.localtime(float(row['publishTime']) / 1000))
                     postid, title, type_, pubTime, content, post_url, author, author_url, tags = (
                         row['id'], row['title'], row['type'],
@@ -115,7 +120,6 @@ def get_like():
 """ + """
 <div id="preface">
   <h2 class="toc-heading">Preface</h2>
-
   <p class="message">
     <b>{}</b><br/>
     Posted originally on the <a href="http://www.lofter.com/">Lofter</a> at <a href="{}">http://{}</a>.
@@ -141,6 +145,7 @@ def get_like():
     <h2 class="toc-heading">{}</h2>
     <div class="userstuff">
       {}
+      {}
     </div>
 </div>
 
@@ -153,7 +158,7 @@ def get_like():
 </div>
 <p id ="if you have any further questions, please contact hhq1801@hotmail.com"><p>
 </body>
-</html>""".format(title, post_url, post_url, tag_out, pubTime, title, author_url, author, title, content, post_url)
+</html>""".format(title, post_url, post_url, tag_out, pubTime, title, author_url, author, title, img, content, post_url)
                     filename =format('{}-{}-{}.html'.format(postid, title, author))
                     if vstate!=1:
                         print(vstate)
